@@ -1,0 +1,44 @@
+version: '3.8'
+
+services:
+  gpsmap9000:
+    image: jkientz/scheiber-garmin-gpsmap9000:latest
+    container_name: gpsmap9000
+    
+    # Expose ports
+    ports:
+      - "6080:6080"   # noVNC web interface
+      - "9222:9222"   # WebKit Inspector
+    
+    # Resource limits (adjust as needed)
+    deploy:
+      resources:
+        limits:
+          cpus: '4'
+          memory: 4G
+        reservations:
+          cpus: '2'
+          memory: 2G
+    
+    # Keep container running
+    stdin_open: true
+    tty: true
+    
+    # Use host network for better performance (optional)
+    # network_mode: "host"
+    
+    environment:
+      # Enable WebKit debugging
+      - WEBKIT_INSPECTOR_SERVER=0.0.0.0:9222
+      - WEBKIT_INSPECTOR_HTTP_SERVER=0.0.0.0:9222
+    
+    # Restart policy
+    restart: unless-stopped
+    
+    # Health check (optional)
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6080/vnc.html"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s
